@@ -1,0 +1,24 @@
+{
+
+	"name": "",
+	"manifest_version":2,
+	"version": "0.1",
+	"background":{
+		"scripts": ["background.js"]
+	},
+	"browser_action":{
+		"title":"Ope noted",
+		"default_popup":"noted.html",
+		"default_icon":"resources/logo.png"
+	},
+	"permissions":[
+		"background",
+		"activeTab",
+		"notifications",
+		"contextMenus",
+		"http://*/",
+		"http://*/*/",
+		"https://*/"
+	]
+
+}
