@@ -3,90 +3,30 @@
 	<title></title>
 	
 	<link rel="stylesheet" type="text/css" href="noted.css">
-	<style type="text/css">
-
-	html{
-		height: 500px;	
-
-	}
-	#noted{
-		width: 300px;
-		height: 100%;
-	}
-
-	#noted header{
-		  font-weight: bold;
-   		 font-size: 19px;
-	}
-	#noted header img{
-	vertical-align: sub;
-	}
-	#noted textarea{
-	    height: 100%;
-		width: 100%;
-		text-align: left;
-		padding:3px;
-		border: none;
-	}
-	#noted textarea:focus{
-		outline-style: none;
-	}
-	#noted #saved-noted{
-   		padding: 5px;
-	}
-	#noted #saved-noted li a{
-		color:#333;
-	}
-	#noted #saved-noted li a:hover{
-		background: #ccc;
-	}
-	#noted .obscure{
-		color: rgb(160, 160, 160);
-	}
-	#noted #editor{
-		text-align: right;
-		padding: 10px;
-		
-	}
-	#noted #editor a{
-		text-decoration: none;
-		display: none;
-	}
-	#noted #editor a:hover{
-		color:#ccc;
-	}
-	</style>
 </head>
 <body>
 
 	<div id="noted">
 
 		<header>
-		 <img src="resources/logo.png">Noted
+		 	<img src="resources/logo.png">Noted
 		</header>
 		
 		<div id="saved-noted">
-			<p class="obscure">Saved noted</p>
-				<ol>
-					
-					<li>
-						<a href="">
-							Este es un ele...
-						</a>
-					</li>
-					<li>
-						<a href="">
-							Parrafo en la linea de....
-						</a>
-					</li>
+			<p id="control-6" class="obscure invisible">Saved noted</p>
+			<p id="control-7" class="obscure">No notes for this page</p>
+				<ol id="control-5">
 				</ol>
 		</div>
 
 		<div id="editor">
-			<a class="obscure" style="font-weight:bold;" href="javascript:void()">Saving note...</a>
-			<textarea placeholder="Write note"></textarea>
+			<a class="danger invisible" id="control-3" style="font-weight:bold;" href="javascript:void()">cancel</a>
+			<a class="obscure invisible" id="control-2" style="font-weight:bold;" href="javascript:void()">save</a>
+			<textarea id="control-4" placeholder="Write note"></textarea>
 		</div>
 	</div>
+	<script type="text/javascript" src="resources/jquery.js"></script>
 	<script type="text/javascript" src="noted.js"></script>
+	<script type="text/javascript" src="app.js"></script>
 </body>
 </html>
