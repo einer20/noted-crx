@@ -60,7 +60,28 @@ var notedApp = {
 							});
 							
 						});
+			var removeIcon = $(document.createElement("img"))
+								.attr({src:"resources/remove.png"})
+								.click(function () {
+									var index = $(this).parent().find("a").data("index");
+
+									var li = $(this).parent().animate({opacity: "0.4", duration:100});
+									var notification = notedApp.showNotification("Noted removed. Click here to undo");
+
+									var id = setTimeout(function  (argument) {
+										notedApp.service.removeNote(index);
+									},5000);
+
+									notification.onclick = function () {
+										clearTimeout(id);
+										li.animate({opacity: 1, duration:100});
+										notification.close();
+									}
+								});
+
+			
 			$(document.createElement("li"))
+			.append(removeIcon)
 			.append(link)
 			.appendTo(control);
 		},
@@ -69,6 +90,9 @@ var notedApp = {
 		},
 		clear:function (argument) {
 			
+		},
+		remove:function (index) {
+			$(this.getControl().find("li").get(index)).remove();
 		},
 		fill:function (list) {
 			this.getControl().find("li").remove();
@@ -133,7 +157,8 @@ var notedApp = {
 			notedApp.getControl(notedApp.controls.CANCEL_NOTE_BUTTON).click(function (e) {
 				listener.call(notedApp, this);
 			})
-		}
+		},
+
 	},
 	showNotification:function (message, timeout, title) {
 	 	if (Notification.permission !== "granted"){
@@ -148,6 +173,8 @@ var notedApp = {
 	        setTimeout(function () {
 	          notification.close();
 	        }, timeout || 5000);
+
+	        return notification;
     	}
     }
 
@@ -158,7 +185,23 @@ $(document).ready(function () {
 
 	
 	notedApp.service.getNotes(function (notes) {
+
+		if (notes.length) {
+			notedApp.showNotification("You have " + notes.length + " saved in this page", 5000, "Noted on this page!");
+		};
+
 		notedApp.savedNotesList.fill(notes);	
+	});
+
+	notedApp.service.onNotedChanges(function (action, notes) {
+		if (action == "remove") {
+			notedApp.savedNotesList.fill(notes);
+		}
+
+		if (notes.length == 0) {
+			notedApp.disableControl(notedApp.controls.SAVED_NOTED_LIST_LABEL);
+			notedApp.enableControl(notedApp.controls.NOT_NOTES_SAVED_LABEL);
+		}
 	});
 
 	notedApp.editor.onWriting(function (e) {
@@ -186,10 +229,13 @@ $(document).ready(function () {
 				
 			}
 			else{
-				this.app.service.addNote(note);
+				this.service.addNote(note);
 				this.disableControl(notedApp.controls.SAVING_INDICATOR_LABEL,notedApp.controls.CANCEL_NOTE_BUTTON);
 				this.showNotification("Noted added!");
-				this.editing.clear();
+				this.editor.clear();
+				this.service.getNotes(function (notes) {
+					notedApp.savedNotesList.fill(notes);
+				})
 			}
 		}
 	});
