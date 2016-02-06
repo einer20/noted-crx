@@ -1,6 +1,11 @@
 function Noted () {
   
-  this.pageId = 'https://developer.chrome.com/extensions/storage';
+  this.storageKey = {};
+  this.storageKeyName = "noted-" + location.href;
+  this.storageKey["noted-" + location.href] = [];
+  this.emptyStorageKey = {};
+  this.emptyStorageKey["noted-" + location.href] = [];
+
   this.savedNotes = []
   this.listeners = [];
   var $this = this;
@@ -8,10 +13,8 @@ function Noted () {
     $this.notifyChanges("create", $this.savedNotes);
   });
 
-  chrome.storage.sync.get({
-    notes:[]
-  },function(data) {
-     $this.savedNotes = data.notes;
+  chrome.storage.sync.get(this.emptyStorageKey,function(data) {
+     $this.savedNotes = data[$this.storageKeyName];
      $this.notifyChanges("loaded", data.notes);
   }); 
 
@@ -20,14 +23,14 @@ function Noted () {
 
 Noted.prototype.getNotes = function(listener) {
 
+  var $this = this;
   if (this.savedNotes.length) {
       listener(this.savedNotes);
   }
   else {
-    chrome.storage.sync.get({
-      notes:[]
-    },function(data) {
-        listener(data.notes);
+    
+    chrome.storage.sync.get(this.emptyStorageKey,function(data) {
+        listener(data[$this.storageKeyName]);
     }); 
   }
 
@@ -50,16 +53,12 @@ Noted.prototype.notifyChanges = function(action) {
   };
 };
 
-Noted.prototype.sendMessage = function(message, timeout , click) {
-
-};
-
 Noted.prototype.addNote = function(note, arguments) {
   this.savedNotes.push(note);
   var $this = this;
-  chrome.storage.sync.set({
-    notes:this.savedNotes
-  }, function() {
+  var data = {};
+  data[this.storageKeyName] = this.savedNotes;
+  chrome.storage.sync.set(data, function() {
     $this.notifyChanges("create");
   });
 };
@@ -68,20 +67,21 @@ Noted.prototype.updateNote = function(index,note) {
   this.savedNotes[index] = note;
 
   var $this = this;
-  chrome.storage.sync.set({
-    notes:this.savedNotes
-  }, function() {
+  var update = {};
+  update[this.storageKeyName] = this.savedNotes;
+  chrome.storage.sync.set(update, function() {
     $this.notifyChanges("update");
   });
 };
 
-Noted.prototype.removeNote = function(note) {  
+Noted.prototype.removeNote = function(note) { 
 
-  for(var i = 0 ; i < this.savedNotes.length; i++)
-  {
-    if (this.savedNotes[i] == note) {
-        this.savedNotes.splice(i,1);
-        this.notifyChanges("delete")
-    }
-  }
+  var $this = this;
+  this.savedNotes.splice(note,1);
+
+  var data = {};
+  data[this.storageKeyName] = this.savedNotes;
+  chrome.storage.sync.set(data, function() {
+    $this.notifyChanges("remove");
+  });
 };
