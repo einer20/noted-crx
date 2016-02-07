@@ -1,10 +1,12 @@
-function Noted () {
+function Noted (keyName) {
   
+  keyName = keyName || location.href;
+  console.log(keyName);
   this.storageKey = {};
-  this.storageKeyName = "noted-" + location.href;
-  this.storageKey["noted-" + location.href] = [];
+  this.storageKeyName = "noted-" + keyName;
+  this.storageKey["noted-" + keyName] = [];
   this.emptyStorageKey = {};
-  this.emptyStorageKey["noted-" + location.href] = [];
+  this.emptyStorageKey["noted-" + keyName] = [];
 
   this.savedNotes = []
   this.listeners = [];
@@ -18,8 +20,16 @@ function Noted () {
      $this.notifyChanges("loaded", data.notes);
   }); 
 
-
 }
+
+Noted.prototype.setStorageKey = function(keyName) {
+  this.storageKey = {};
+  this.storageKeyName = "noted-" + keyName;
+  this.storageKey["noted-" + keyName] = [];
+  this.emptyStorageKey = {};
+  this.emptyStorageKey["noted-" + keyName] = [];
+
+};
 
 Noted.prototype.getNotes = function(listener) {
 
