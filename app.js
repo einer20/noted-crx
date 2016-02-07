@@ -1,6 +1,6 @@
 
 var notedApp = {
-	service: new Noted(),
+	service: null,
 	controls: {
 		NOTE_EDITOR: 1,
 		SAVING_INDICATOR_LABEL : 2,
@@ -181,69 +181,70 @@ var notedApp = {
 }
 
 
+
 $(document).ready(function () {
 
-	
-	notedApp.service.getNotes(function (notes) {
+	chrome.tabs.query({currentWindow: true, active: true}, function (tabs){
+	    url = tabs[0].url;
+	    notedApp.service = new Noted(url);
 
-		if (notes.length) {
-			notedApp.showNotification("You have " + notes.length + " saved in this page", 5000, "Noted on this page!");
-		};
+		notedApp.service.getNotes(function (notes) {
+			notedApp.savedNotesList.fill(notes);	
+		});
 
-		notedApp.savedNotesList.fill(notes);	
-	});
+		notedApp.service.onNotedChanges(function (action, notes) {
+			if (action == "remove") {
+				notedApp.savedNotesList.fill(notes);
+			}
 
-	notedApp.service.onNotedChanges(function (action, notes) {
-		if (action == "remove") {
-			notedApp.savedNotesList.fill(notes);
-		}
+			if (notes.length == 0) {
+				notedApp.disableControl(notedApp.controls.SAVED_NOTED_LIST_LABEL);
+				notedApp.enableControl(notedApp.controls.NOT_NOTES_SAVED_LABEL);
+			}
+		});
 
-		if (notes.length == 0) {
-			notedApp.disableControl(notedApp.controls.SAVED_NOTED_LIST_LABEL);
-			notedApp.enableControl(notedApp.controls.NOT_NOTES_SAVED_LABEL);
-		}
-	});
-
-	notedApp.editor.onWriting(function (e) {
-		if ($.trim($(e.delegateTarget).val()).length) {
-			this.enableControl(this.controls.SAVING_INDICATOR_LABEL, this.controls.CANCEL_NOTE_BUTTON);
-		}
-		else{
-			this.disableControl(this.controls.SAVING_INDICATOR_LABEL, this.controls.CANCEL_NOTE_BUTTON);	
-		}
-	});
-
-	notedApp.editor.onSave(function (app) {
-		var note = this.editor.getNote();
-		if (note.length) {
-
-			if (this.editor.state.editing) {
-				this.service.updateNote(this.editor.state.index, note);
-				this.showNotification("Noted updated!");
-				this.disableControl(notedApp.controls.SAVING_INDICATOR_LABEL,notedApp.controls.CANCEL_NOTE_BUTTON);
-				this.editor.state.editing = false;
-				this.editor.clear();
-				this.service.getNotes(function (notes) {
-					notedApp.savedNotesList.fill(notes);
-				})
-				
+		notedApp.editor.onWriting(function (e) {
+			if ($.trim($(e.delegateTarget).val()).length) {
+				this.enableControl(this.controls.SAVING_INDICATOR_LABEL, this.controls.CANCEL_NOTE_BUTTON);
 			}
 			else{
-				this.service.addNote(note);
-				this.disableControl(notedApp.controls.SAVING_INDICATOR_LABEL,notedApp.controls.CANCEL_NOTE_BUTTON);
-				this.showNotification("Noted added!");
-				this.editor.clear();
-				this.service.getNotes(function (notes) {
-					notedApp.savedNotesList.fill(notes);
-				})
+				this.disableControl(this.controls.SAVING_INDICATOR_LABEL, this.controls.CANCEL_NOTE_BUTTON);	
 			}
-		}
-	});
+		});
 
-	notedApp.editor.onCancel(function () {
-		this.editor.getControl().val("");
-		this.editor.getControl().focus();
-		this.disableControl(this.controls.CANCEL_NOTE_BUTTON, this.controls.SAVING_INDICATOR_LABEL);
+		notedApp.editor.onSave(function (app) {
+			var note = this.editor.getNote();
+			if (note.length) {
+
+				if (this.editor.state.editing) {
+					this.service.updateNote(this.editor.state.index, note);
+					this.showNotification("Noted updated!");
+					this.disableControl(notedApp.controls.SAVING_INDICATOR_LABEL,notedApp.controls.CANCEL_NOTE_BUTTON);
+					this.editor.state.editing = false;
+					this.editor.clear();
+					this.service.getNotes(function (notes) {
+						notedApp.savedNotesList.fill(notes);
+					})
+					
+				}
+				else{
+					this.service.addNote(note);
+					this.disableControl(notedApp.controls.SAVING_INDICATOR_LABEL,notedApp.controls.CANCEL_NOTE_BUTTON);
+					this.showNotification("Noted added!");
+					this.editor.clear();
+					this.service.getNotes(function (notes) {
+						notedApp.savedNotesList.fill(notes);
+					})
+				}
+			}
+		});
+
+		notedApp.editor.onCancel(function () {
+			this.editor.getControl().val("");
+			this.editor.getControl().focus();
+			this.disableControl(this.controls.CANCEL_NOTE_BUTTON, this.controls.SAVING_INDICATOR_LABEL);
+		});
+
 	});
 });
 
