@@ -3,9 +3,14 @@
 	"name": "",
 	"manifest_version":2,
 	"version": "0.1",
-	"background":{
+	/*"background":{
 		"scripts": ["background.js"]
-	},
+	},*/
+	"content_scripts":[{
+		"matches":["http://*/*","https://*/*"],
+		"js":["resources/jquery.js","resources/utils.js","noted.js","page_load.js"]
+
+	}],
 	"browser_action":{
 		"title":"Ope noted",
 		"default_popup":"noted.html",
@@ -15,11 +20,13 @@
 		"background",
 		"activeTab",
 		"storage",
+		"tabs",
 		"notifications",
 		"contextMenus",
 		"http://*/",
-		"http://*/*/",
-		"https://*/"
+		"http://*/*",
+		"https://*/",
+		"https://*/*"
 	]
 
 }
